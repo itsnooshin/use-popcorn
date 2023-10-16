@@ -52,24 +52,35 @@ const average = (arr) =>
 function App() {
   const [movies, setMovies] = useState([]);
   const [watched, setWatched] = useState([]);
+  const [error , setError] = useState('');
+  const [isLoading, setLoading] = useState(false);
+
   const KEY = "879026be";
-  // fetch apis
-  // const res = fetch(`http://www.omdbapi.com/?apikey=${KEY}&`).then((res) => {
-  //   if (!res.ok) {
-  //     throw new Error("Network response failed");
-  //   }
-  //   const newId = res.json();
-  //   console.log(newId);
-  // });
-  // console.log(res);
-  // fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=barbie`)
-  //   .then((res) => res.json())
-  //   .then((data) => console.log(data.Search));
 
   useEffect(function () {
-    fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=barbie`)
-      .then((res) => res.json())
-      .then((data) => setMovies(data.Search));
+    async function fetchMovies() {
+      try {
+        setLoading(true);
+        const res = await fetch(
+          `http://www.omdbapi.com/?apikey=${KEY}&s=jjjjj`
+        );
+        if (!res.ok) {
+          throw new Error("Interet connection error");
+        }
+        const data = await res.json();
+          if(data.Response === 'False') throw new Error("Movie is not found");
+        setMovies(data.Search);
+      } catch (error) {
+        console.error(error.message);
+        setError(error.message);
+      }
+       finally{
+        setLoading(false);
+       }
+      
+      
+    }
+    fetchMovies();
   }, []);
 
   return (
@@ -81,8 +92,10 @@ function App() {
       </HeaderNavbar>
       <Main movies={movies}>
         <Box>
-          <ListMovies movies={movies} />
-        </Box>
+          {isLoading && <Loader/>}
+          {!isLoading && !error && <ListMovies movies={movies}/>}
+          {error && <ErrorMessage message={error}/>}
+          </Box>
         <Box>
           <SummaryWatched watched={watched} />
           <MoviesDetail watched={watched} />
@@ -91,7 +104,17 @@ function App() {
     </>
   );
 }
+function Loader() {
+  return <p className="loader">Loading...</p>;
+}
 
+function ErrorMessage({message}){
+  return (
+    <p className="error">
+     <span>⛔</span> {message}
+    </p>
+  )
+}
 // split compoenent
 function HeaderNavbar({ children }) {
   return (
@@ -100,6 +123,7 @@ function HeaderNavbar({ children }) {
     </div>
   );
 }
+
 function Logo() {
   return (
     <div className="logo">
@@ -257,4 +281,4 @@ function ListDetailMovie({ movie }) {
     </li>
   );
 }
-
+export default App;
