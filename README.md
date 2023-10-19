@@ -4,7 +4,7 @@
 
 ## Demo 
 
-![](./public/popcorn.gif)
+![](./src/assets/Rec%200003%20(2).gif)
 
 
 ## Functionality
