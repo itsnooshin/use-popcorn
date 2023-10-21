@@ -1,8 +1,14 @@
 import { Children, useEffect, useState } from "react";
-import { ClapSpinner } from "react-spinners-kit";
-import StarRating from "./StarRating";
-const average = (arr) =>
-  arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
+import StarRating from "./Components/StarRating";
+import { Loader } from "./Components/Loader";
+import { Logo } from "./Components/Logo";
+import ListMovies from "./Components/ListMovies";
+import NumberOfList from "./Components/NumberOfList";
+import SummaryWatched from "./Components/SummaryWatched";
+import MoviesDetail from "./Components/MoviesDetail";
+import HeaderNavbar from "./Components/HeaderNavbar";
+import SearchInput from "./Components/SearchInput";
+import Box from "./Components/Box";
 
 function App() {
   const [movies, setMovies] = useState([]); //state for all movies
@@ -11,8 +17,7 @@ function App() {
   const [error, setError] = useState(""); // state for error messages
   const [isLoading, setLoading] = useState(false); // state for loading
   const [selectedMovieId, setSelectedMovieId] = useState(null);
-
-  const [isSelectedMovie, setSelectedMovie] = useState(false);
+  //
 
   const KEY = "879026be";
   useEffect(
@@ -60,10 +65,9 @@ function App() {
   function handleAddWatchedMovie(movies) {
     setWatched([...watched, movies]);
     setSelectedMovieId(null);
-   
   }
-  function removeList(id){
-    setWatched(watched.filter(movie => movie.imdbID !== id));
+  function removeList(id) {
+    setWatched(watched.filter((movie) => movie.imdbID !== id));
   }
 
   return (
@@ -97,12 +101,11 @@ function App() {
               handleBack={handleBack}
               AddWatached={handleAddWatchedMovie}
               watched={watched}
-              isSelectedMovie={isSelectedMovie}
             />
           ) : (
             <>
               <SummaryWatched watched={watched} />
-              <MoviesDetail watched={watched} removeList  ={removeList}/>
+              <MoviesDetail watched={watched} removeList={removeList} />
             </>
           )}
         </Box>
@@ -110,20 +113,22 @@ function App() {
     </>
   );
 }
-function Overview({
-  selectedMovieId,
-  handleBack,
-  AddWatached,
-  watched ,
-}) {
-  const [selectedRating, setSelectedRating] = useState(0);
+function ErrorMessage({ message }) {
+  return (
+    <p className="error">
+      <span>⛔</span> {message}
+    </p>
+  );
+}
+function Overview({ selectedMovieId, handleBack, AddWatached, watched }) {
   const [movieData, setMovieData] = useState({});
   const [isLoading, setLoading] = useState(false);
+  const [selectedRating, setSelectedRating] = useState(0);
 
-
-  const isWatched = watched.map(movie => movie.imdbID);
-  const rating = watched.find((movie) => movie.imdbID === selectedMovieId)?.userRating;
- 
+  const isWatched = watched.map((movie) => movie.imdbID);
+  const rating = watched.find(
+    (movie) => movie.imdbID === selectedMovieId
+  )?.userRating;
 
   const KEY = "879026be";
   useEffect(
@@ -134,6 +139,7 @@ function Overview({
           `http://www.omdbapi.com/?apikey=${KEY}&i=${selectedMovieId}`
         );
         const data = await res.json();
+        console.log(data);
         setMovieData(data);
         setLoading(false);
       }
@@ -202,7 +208,6 @@ function Overview({
           </header>
           <section>
             <div className="rating">
-
               {!isWatched.includes(selectedMovieId) ? (
                 <>
                   <StarRating
@@ -224,7 +229,6 @@ function Overview({
             <em>{movieData.Plot}</em>
             <p>Starring {movieData.Actors}</p>
             <p>Directed by {movieData.Director} </p>
-            
           </section>
         </div>
       )}
@@ -232,166 +236,20 @@ function Overview({
   );
 }
 
-function Loader({ loading }) {
-  return (
-    <div className="loader">
-      <ClapSpinner size={50} color="#fff" loading={loading} />
-    </div>
-  );
-}
-
-function ErrorMessage({ message }) {
-  return (
-    <p className="error">
-      <span>⛔</span> {message}
-    </p>
-  );
-}
-// split compoenent
-function HeaderNavbar({ children }) {
-  return (
-    <div>
-      <nav className="nav-bar">{children}</nav>
-    </div>
-  );
-}
-
-function Logo() {
-  return (
-    <div className="logo">
-      <span role="img">🍿</span>
-      <h1>usePopcorn</h1>
-    </div>
-  );
-}
-function NumberOfList({ movies }) {
-  return (
-    <p className="num-results">
-      Found <strong>{movies.length}</strong> results
-    </p>
-  );
-}
-function SearchInput({ query, setQuery }) {
-  return (
-    <input
-      className="search"
-      type="text"
-      placeholder="Search movies..."
-      value={query}
-      onChange={(e) => setQuery(e.target.value)}
-    />
-  );
-}
+// function SearchInput({ query, setQuery }) {
+//   return (
+//     <input
+//       className="search"
+//       type="text"
+//       placeholder="Search movies..."
+//       value={query}
+//       onChange={(e) => setQuery(e.target.value)}
+//     />
+//   );
+// }
 
 function Main({ children }) {
-  return (
-    <main className="main">
-      {/* <ListBox movies={movies} />
-      <WatchedBox /> */}
-      {children}
-    </main>
-  );
+  return <main className="main">{children}</main>;
 }
 
-function Box({ children }) {
-  const [isOpen, setIsOpen] = useState(true);
-
-  return (
-    <div className="box">
-      <button className="btn-toggle" onClick={() => setIsOpen((open) => !open)}>
-        {isOpen ? "–" : "+"}
-      </button>
-      {isOpen && children}
-    </div>
-  );
-}
-function ListMovies({ movies, handleList }) {
-  return (
-    <ul className="list list-movies">
-      {movies?.map((movie) => (
-        <Movie movie={movie} handleList={handleList} key={movie.imdbID} />
-      ))}
-    </ul>
-  );
-}
-function Movie({ movie, handleList }) {
-  return (
-    <li key={movie.imdbID} onClick={() => handleList(movie.imdbID)}>
-      <img src={movie.Poster} alt={`${movie.Title} poster`} />
-      <h3>{movie.Title}</h3>
-      <div>
-        <p>
-          <span>🗓</span>
-          <span>{movie.Year}</span>
-        </p>
-      </div>
-    </li>
-  );
-}
-
-function SummaryWatched({ watched }) {
-  const avgRuntime = average(watched.map((movie) => movie.runtime));
-  const avgImdbRating = average(watched.map((movie) => movie.imdbRating));
-  const avgUserRating = average(watched.map((movie) => movie.userRating));
-  return (
-    <div className="summary">
-      <h2>Movies you watched</h2>
-      <div>
-        <p>
-          <span>#️⃣</span>
-          <span>{watched.length} movies</span>
-        </p>
-        <p>
-          <span>⭐️</span>
-          <span>{avgImdbRating.toFixed(2)}</span>
-        </p>
-        <p>
-          <span>🌟</span>
-          <span>{avgUserRating}</span>
-        </p>
-        <p>
-          <span>⏳</span>
-          <span>{avgRuntime.toFixed(2)} min</span>
-        </p>
-      
-      </div>
-    </div>
-  );
-}
-
-function MoviesDetail({ watched , removeList }) {
-  return (
-    <ul className="list">
-      {watched.map((movie, i) => (
-        <ListDetailMovie movie={movie} key={i}  id = {i} removeList ={removeList}/>
-      ))}
-    </ul>
-  );
-}
-function ListDetailMovie({ movie , removeList}) {
-   console.log(movie);
-  return (
-    <li key={movie.imdbID}>
-      <img src={movie.poster} alt={`${movie.title} poster`} />
-      <h3>{movie.title}</h3>
-      <div>
-        <p>
-          <span>⭐️</span>
-          <span>{movie.imdbRating}</span>
-        </p>
-        <p>
-          <span>🌟</span>
-          <span>{movie.userRating}</span>
-        </p>
-        <p>
-          <span>⏳</span>
-          <span>{movie.runtime} min</span>
-        </p>
-        <button className="btn-delete" onClick={() => removeList(movie.imdbID)}>
-          X
-        </button>
-      </div>
-    </li>
-  );
-}
 export default App;
