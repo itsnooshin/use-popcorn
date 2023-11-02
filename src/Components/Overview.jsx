@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
-import StarRating from "./StarRating";
-import { Loader } from "./Loader";
+import { useEffect, useState } from 'react';
+import StarRating from './StarRating';
+import { Loader } from './Loader';
 
 export function Overview({
   selectedMovieId,
@@ -14,28 +14,27 @@ export function Overview({
 
   const isWatched = watched.map((movie) => movie.imdbID);
   const rating = watched.find(
-    (movie) => movie.imdbID === selectedMovieId
+    (movie) => movie.imdbID === selectedMovieId,
   )?.userRating;
 
-  const KEY = "879026be";
+  const KEY = '879026be';
   useEffect(
     function () {
       async function MovieInformation() {
         setLoading(true);
         const res = await fetch(
-          `http://www.omdbapi.com/?apikey=${KEY}&i=${selectedMovieId}`
+          `http://www.omdbapi.com/?apikey=${KEY}&i=${selectedMovieId}`,
         );
         const data = await res.json();
-        console.log(data);
+        // console.log(data);
         setMovieData(data);
         setLoading(false);
       }
 
       MovieInformation();
     },
-    [selectedMovieId]
+    [selectedMovieId],
   );
-
   function handleRatingChange(newRating) {
     setSelectedRating(newRating);
   }
@@ -58,8 +57,6 @@ export function Overview({
       title,
       year,
       poster,
-
-      // userRating: imdbRating,
       userRating: selectedRating,
       imdbRating: Number(imdbRating),
       runtime: parseInt(runtime, 10),
@@ -68,10 +65,33 @@ export function Overview({
     // setSelectedRating(selectedRating);
     // setRatedAdd(true);
   }
+  useEffect(() => {
+    function callBack(event) {
+      if (event.code === 'Escape') {
+        handleBack();
+        console.log('CLOSE');
+        
+      }
+    }
+    document.addEventListener('keydown', callBack);
+
+    return function () {
+      document.removeEventListener('keydown', callBack);
+    };
+  }, [handleBack]);
+
+  useEffect(() => {
+    if (!title) return;
+    document.title = `Movie | ${title}`;
+
+    return function () {
+      document.title = `usePopcorn`;
+    };
+  }, [title]);
 
   return (
     <>
-      {" "}
+      {' '}
       {isLoading ? (
         <Loader />
       ) : (
@@ -84,7 +104,7 @@ export function Overview({
             <div className="details-overview">
               <h2>{movieData.Title}</h2>
               <p>
-                {movieData.Released} .{movieData.Runtime}{" "}
+                {movieData.Released} .{movieData.Runtime}{' '}
               </p>
               <p>{movieData.Genre}</p>
               <p>
