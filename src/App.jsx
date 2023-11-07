@@ -15,10 +15,24 @@ import { Main } from './MainStructre';
 function App() {
   const [movies, setMovies] = useState([]); //state for all movies
   const [query, setQuery] = useState(''); // state for searach
-  const [watched, setWatched] = useState([]); // state for watched
+  // const [watched, setWatched] = useState([]); // state for watched
   const [error, setError] = useState(''); // state for error messages
   const [isLoading, setLoading] = useState(false); // state for loading
   const [selectedMovieId, setSelectedMovieId] = useState(null);
+  const [watched, setWatched] = useState(function () {
+    const ItemFromStorage = localStorage.getItem('watched');
+    return JSON.parse(ItemFromStorage);
+  }); // state for watched
+  // useEffect(() => {
+  //   const ItemFromStorage = localStorage.getItem('watched');
+  //   if (ItemFromStorage) {
+  //     setWatched(JSON.parse(ItemFromStorage));
+  //   }
+  // }, []);
+  // add localStorage on my project
+  useEffect(() => {
+    localStorage.setItem('watched', JSON.stringify(watched));
+  }, [watched]);
 
   const KEY = '879026be';
   useEffect(
@@ -76,6 +90,8 @@ function App() {
   function handleAddWatchedMovie(movies) {
     setWatched([...watched, movies]);
     setSelectedMovieId(null);
+
+    //
   }
   function removeList(id) {
     setWatched(watched.filter((movie) => movie.imdbID !== id));

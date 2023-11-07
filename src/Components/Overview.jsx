@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import StarRating from './StarRating';
 import { Loader } from './Loader';
 
@@ -11,6 +11,8 @@ export function Overview({
   const [movieData, setMovieData] = useState({});
   const [isLoading, setLoading] = useState(false);
   const [selectedRating, setSelectedRating] = useState(0);
+
+  const countRef = useRef(0);
 
   const isWatched = watched.map((movie) => movie.imdbID);
   const rating = watched.find(
@@ -26,7 +28,7 @@ export function Overview({
           `http://www.omdbapi.com/?apikey=${KEY}&i=${selectedMovieId}`,
         );
         const data = await res.json();
-        // console.log(data);
+
         setMovieData(data);
         setLoading(false);
       }
@@ -38,6 +40,9 @@ export function Overview({
   function handleRatingChange(newRating) {
     setSelectedRating(newRating);
   }
+
+  /* eslint-disable */
+
   const {
     Title: title,
     Year: year,
@@ -51,6 +56,15 @@ export function Overview({
     Genre: genre,
     UserRating: userRating,
   } = movieData;
+
+  useEffect(() => {
+    if (selectedRating) countRef.current++;
+  }, [selectedRating]);
+  // const [isTop, setIsTop] = useState(imdbRating > 8);
+  // console.log(isTop);
+
+  // const [avrageRating, setAvrageRating] = useState(0);
+
   function handleAdd() {
     const newMovie = {
       imdbID: selectedMovieId,
@@ -60,17 +74,25 @@ export function Overview({
       userRating: selectedRating,
       imdbRating: Number(imdbRating),
       runtime: parseInt(runtime, 10),
+      countRating: countRef.current,
     };
+    console.log(selectedRating);
+    // console.log(imdbRating, selectedRating, userRating); // 7.1  , 9
+
     AddWatached(newMovie);
     // setSelectedRating(selectedRating);
     // setRatedAdd(true);
+    // setAvrageRating(Number(imdbRating));
+    // setAvrageRating((avrageRating) => (avrageRating + selectedRating) / 2);
+    // 8.7 + 10 / 2 = 4.5
+    // 0 ==> chon inital has 0  + 10 = 10 / 2  === 5
   }
+
   useEffect(() => {
     function callBack(event) {
       if (event.code === 'Escape') {
         handleBack();
         console.log('CLOSE');
-        
       }
     }
     document.addEventListener('keydown', callBack);
@@ -113,6 +135,7 @@ export function Overview({
               </p>
             </div>
           </header>
+
           <section>
             <div className="rating">
               {!isWatched.includes(selectedMovieId) ? (
